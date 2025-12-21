@@ -1,5 +1,6 @@
 package com.example.MultiUserSecurityDemo.entity;
 
+import com.example.MultiUserSecurityDemo.enums.UserRoles1;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;

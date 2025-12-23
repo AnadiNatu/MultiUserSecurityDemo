@@ -6,6 +6,9 @@ import com.example.MultiUserSecurityDemo.adapter.security.user_details.UserType1
 import com.example.MultiUserSecurityDemo.adapter.security.user_details.UserType2Details;
 import com.example.MultiUserSecurityDemo.adapter.web.dto.LoginRequest;
 import com.example.MultiUserSecurityDemo.adapter.web.dto.LoginResponse;
+import com.example.MultiUserSecurityDemo.adapter.web.dto.SignUpRequest;
+import com.example.MultiUserSecurityDemo.adapter.web.dto.SignUpResponse;
+import com.example.MultiUserSecurityDemo.adapter.web.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,10 +25,41 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final AuthService authService;
 
-    public AuthController(AuthenticationManager authenticationManager , JwtUtil jwtUtil){
+    public AuthController(AuthenticationManager authenticationManager , JwtUtil jwtUtil , AuthService authService){
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.authService = authService;
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<SignUpResponse> signup(@RequestBody SignUpRequest request){
+        if (request.getEmail() == null || request.getEmail().isEmpty()){
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(SignUpResponse.builder().message("Email is required").build());
+        }
+
+        if (request.getPassword() == null || request.getPassword().isEmpty()){
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(SignUpResponse.builder().message("Password is required").build());
+        }
+
+        if (request.getUserType() == null || request.getUserType().isEmpty()){
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(SignUpResponse.builder().message("User Type is Required (TYPE1 or TYPE2)").build());
+        }
+
+        SignUpResponse response = authService.signup(request);
+        if (response.getId() != null){
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
     }
 
     @PostMapping("/login")

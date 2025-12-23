@@ -14,7 +14,6 @@ public class UserType2 {
 
     public UserType2() {}
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

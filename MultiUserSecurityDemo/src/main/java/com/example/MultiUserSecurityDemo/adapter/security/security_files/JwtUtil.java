@@ -1,11 +1,15 @@
 package com.example.MultiUserSecurityDemo.adapter.security.security_files;
 
+import com.example.MultiUserSecurityDemo.domain.model.UserType1;
+import com.example.MultiUserSecurityDemo.domain.model.UserType2;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -78,5 +82,19 @@ public class JwtUtil {
         return extractClaim(token , Claims::getExpiration);
     }
 
+    public UserType1 getLoggedInUserType1(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof UserType1 u1){
+           return u1;
+        }
+        return null;
+    }
 
+    public UserType2 getLoggedInUserType2(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof UserType2 u2){
+            return u2;
+        }
+        return null;
+    }
 }

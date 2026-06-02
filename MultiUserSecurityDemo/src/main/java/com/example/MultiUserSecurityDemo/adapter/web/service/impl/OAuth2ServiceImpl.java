@@ -20,8 +20,7 @@ public class OAuth2ServiceImpl {
 
     private final UserType2Repository userType2Repository;
 
-    // ─── PUBLIC API ───────────────────────────────────────────────────────────
-
+    // PUBLIC API
     public UserType2Entity handleOAuthUser(String email,
                                            String name,
                                            String provider,
@@ -29,6 +28,11 @@ public class OAuth2ServiceImpl {
                                            OAuth2User oAuth2User) {
 
         log.info("[OAUTH2] handleOAuthUser | provider={} | email={}", provider, email);
+
+//        VALIDATION
+        if (email == null || email.isBlank()) {
+            throw new RuntimeException("OAuth provider did not return email");
+        }
 
         return userType2Repository.findByEmail(email)
                 .map(existing -> updateExistingUser(existing, provider, providerId, oAuth2User))

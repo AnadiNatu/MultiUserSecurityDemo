@@ -201,38 +201,18 @@
         <dependency><groupId>org.springframework.session</groupId><artifactId>spring-session-jdbc</artifactId></dependency>
 
         <dependency><groupId>com.cloudinary</groupId><artifactId>cloudinary-http44</artifactId><version>1.36.0</version></dependency>
-        <!-- ===== SPRING CLOUD LOAD BALANCER =====
-             FIX: Version managed by Spring Cloud BOM (2023.0.4) declared below.
-             No explicit version tag needed or recommended here.
-             NOTE: Only keep this if you plan to use @LoadBalanced RestTemplate
-             or WebClient for inter-service calls. If this is a standalone
-             single-service application, you can safely remove this dependency.
-        -->
+
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
 
-        <!-- ===== TWILIO =====
-             FIX: 10.1.0 is the current latest stable release as of 2025. ✓
-             Twilio is NOT managed by Spring Boot BOM, so explicit version is
-             required and correct here.
-        -->
         <dependency>
             <groupId>com.twilio.sdk</groupId>
             <artifactId>twilio</artifactId>
             <version>10.1.0</version>
         </dependency>
 
-        <!-- ===== SPRING SESSION JDBC =====
-             FIX: Version managed by Boot parent.
-             IMPORTANT: You have spring-session-jdbc declared here AND
-             spring-boot-starter-data-redis above. These two can conflict
-             unless you explicitly set spring.session.store-type=jdbc in
-             application.properties (which you have done - so this is correct).
-             If you later want Redis-backed sessions, remove this dependency
-             and change spring.session.store-type=redis.
-        -->
         <dependency>
             <groupId>org.springframework.session</groupId>
             <artifactId>spring-session-jdbc</artifactId>
@@ -245,30 +225,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!--
-            RECOMMENDED ADDITIONS (commented out - uncomment when ready):
-
-            Spring Security Test - for testing secured endpoints:
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-test</artifactId>
-                <scope>test</scope>
-            </dependency>
-
-            OpenAPI / Swagger UI - for API documentation:
-            <dependency>
-                <groupId>org.springdoc</groupId>
-                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-                <version>2.5.0</version>
-            </dependency>
-
-            Micrometer Prometheus - for metrics export to Prometheus/Grafana:
-            <dependency>
-                <groupId>io.micrometer</groupId>
-                <artifactId>micrometer-registry-prometheus</artifactId>
-            </dependency>
-        -->
-
         <dependency>
             <groupId>org.springframework.session</groupId>
             <artifactId>spring-session-jdbc</artifactId>
@@ -279,12 +235,7 @@
             <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
     </dependencies>
-
-    <!-- ================= SPRING CLOUD BOM =================
-         This import manages ALL Spring Cloud dependency versions in one place.
-         Cloud 2023.0.4 is compatible with Spring Boot 3.2.x.
-         Always use BOM import rather than specifying cloud dependency versions manually.
-    -->
+    
     <dependencyManagement>
         <dependencies>
             <dependency>

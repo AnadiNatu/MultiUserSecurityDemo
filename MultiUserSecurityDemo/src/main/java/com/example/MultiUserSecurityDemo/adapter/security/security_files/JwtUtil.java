@@ -64,23 +64,6 @@ public class JwtUtil {
                 .signWith(getSigningKey()).compact();
     }
 
-//    public String generateTokenFromUser(UserType1 user) {
-//
-//        Map<String, Object> claims = new HashMap<>();
-//
-//        claims.put("userId", user.getId());
-//        claims.put("email", user.getEmail());
-//        claims.put("role", user.getRoles1().name());
-//        claims.put("provider", user.getProvider());
-//
-//        return Jwts.builder()
-//                .setClaims(claims)
-//                .setSubject(user.getEmail())
-//                .setIssuedAt(new Date())
-//                .setExpiration(new Date(System.currentTimeMillis() + expiration))
-//                .signWith(getSigningKey())
-//                .compact();
-//    }
     private SecretKey getSigningKey(){
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);

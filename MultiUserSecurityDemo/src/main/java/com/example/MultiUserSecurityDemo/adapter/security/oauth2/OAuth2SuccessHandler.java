@@ -21,38 +21,20 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-/**
- * Invoked by Spring Security after a successful OAuth2 login.
- *
- * Flow:
- *  1. Extract email / name / provider from the {@link OAuth2User} principal.
- *  2. Delegate to {@link OAuth2ServiceImpl#handleOAuthUser} to find-or-create
- *     the {@link UserType2Entity} record.
- *  3. Build a {@link UserType2Details} wrapper and generate a JWT.
- *  4. Redirect the browser to the frontend callback URL with token query params.
- *
- * On error a redirect to {@code <frontendUrl>/oauth2/callback?error=...} is sent
- * so the frontend can display a meaningful message.
- */
+
 @Component
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private static final Logger log = LoggerFactory.getLogger(OAuth2SuccessHandler.class);
 
-    /**
-     * Base URL of the React / Angular frontend.
-     * Defaults to the Vite dev-server; override in application.properties with
-     * {@code app.frontend.url=https://your-prod-domain.com}.
-     */
     @Value("${app.frontend.url:http://localhost:5173}")
     private String frontendUrl;
 
     private final JwtUtil jwtUtil;
     private final OAuth2ServiceImpl oAuth2Service;
 
-    // ─── HANDLER ENTRY POINT ─────────────────────────────────────────────────
-
+    // HANDLER ENTRY POINT
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
@@ -109,12 +91,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         }
     }
 
-    // ─── HELPERS ─────────────────────────────────────────────────────────────
-
-    /**
-     * Converts a {@link UserType2Entity} (JPA entity) into a
-     * {@link UserType2Details} (Spring Security principal) via the domain model.
-     */
+    // HELPERS
     private UserType2Details toUserDetails(UserType2Entity entity) {
         UserType2 domain = new UserType2();
         domain.setId(entity.getId());

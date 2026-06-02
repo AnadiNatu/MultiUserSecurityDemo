@@ -44,6 +44,9 @@ public class SecurityConfig {
     @Value("${app.frontend.url:http://localhost:5173}")
     private String frontendUrl;
 
+    @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:4200}")
+    private String allowedOrigins;
+
     // ================= SECURITY FILTER CHAIN =================
 
     @Bean
@@ -146,8 +149,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(
-                Arrays.asList("http://localhost:4200", "http://localhost:3000" , "http://localhost:5173"));
+
+        List<String> origins  = Arrays.asList(allowedOrigins.split(","));
+        corsConfig.setAllowedOrigins(origins);
         corsConfig.setAllowedMethods(
                 Arrays.asList("GET", "POST", "PUT", "PATCH" ,"DELETE", "OPTIONS"));
         corsConfig.setAllowedHeaders(List.of("*"));

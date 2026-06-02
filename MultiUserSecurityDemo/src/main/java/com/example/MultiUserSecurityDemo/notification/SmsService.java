@@ -63,6 +63,5 @@ public class SmsService {
         if (phone.startsWith("91")) return "+" + phone;
 
         return "+91" + phone;
-
     }
 }

@@ -11,7 +11,6 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.2.5</version>
-        <!-- FIX: relativePath empty tag is correct for fetching from Maven Central -->
         <relativePath/>
     </parent>
 
@@ -19,110 +18,143 @@
     <groupId>com.example</groupId>
     <artifactId>MultiUserSecurityDemo</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+
     <name>MultiUserSecurityDemo</name>
-    <description>Multi User Security Demo with JWT, Redis, Mail, Twilio</description>
+
+    <description>
+        Multi User Security Demo with JWT, OAuth2, Mail,
+        Twilio, Cloudinary, PostgreSQL and Docker
+    </description>
 
     <!-- ================= PROPERTIES ================= -->
     <properties>
         <java.version>21</java.version>
-        <!--
-            FIX: Spring Cloud 2023.0.4 is the correct BOM version for Spring Boot 3.2.x.
-            Compatibility matrix: Boot 3.2.x → Cloud 2023.0.x ✓
-        -->
         <spring-cloud.version>2023.0.4</spring-cloud.version>
+        <jjwt.version>0.12.3</jjwt.version>
+        <lombok.version>1.18.34</lombok.version>
     </properties>
+
+    <!-- ================= DEPENDENCY MANAGEMENT ================= -->
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- AWS SDK BOM -->
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>2.30.38</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
 
     <!-- ================= DEPENDENCIES ================= -->
     <dependencies>
 
-        <!-- ===== CORE ===== -->
+        <!-- ====================================================== -->
+        <!-- WEB -->
+        <!-- ====================================================== -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <!-- Version managed by Spring Boot parent - no version tag needed -->
         </dependency>
+
+        <!-- ====================================================== -->
+        <!-- DATA JPA -->
+        <!-- ====================================================== -->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
-            <!-- Version managed by Spring Boot parent -->
         </dependency>
 
-        <!-- ===== VALIDATION =====
-             FIX: Was MISSING entirely. Required for @NotBlank, @Email, @Size,
-             @Valid on your DTOs. Without this, bean validation annotations are
-             silently ignored and no input validation occurs at all.
-        -->
+        <!-- ====================================================== -->
+        <!-- VALIDATION -->
+        <!-- ====================================================== -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!-- ===== SECURITY ===== -->
+        <!-- ====================================================== -->
+        <!-- SECURITY -->
+        <!-- ====================================================== -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- ===== DATABASE =====
-             FIX: No version tag needed — Boot 3.2.5 manages PostgreSQL driver
-             at version 42.7.3 automatically via the parent BOM.
-             Keeping <scope>runtime</scope> is correct.
-        -->
+        <!-- ====================================================== -->
+        <!-- OAUTH2 -->
+        <!-- ====================================================== -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
+
+        <!-- ====================================================== -->
+        <!-- POSTGRESQL -->
+        <!-- ====================================================== -->
+
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- ===== LOMBOK =====
-             FIX: Version 1.18.34 is the correct Java 21-safe version. Keeping
-             the explicit override is intentional here because Spring Boot 3.2.5
-             manages Lombok at 1.18.30 internally, which has a known annotation
-             processor issue on Java 21 record patterns. 1.18.34 is safer.
-             <scope>provided</scope> is correct — compile-time only.
-        -->
+        <!-- ====================================================== -->
+        <!-- LOMBOK -->
+        <!-- ====================================================== -->
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.34</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
 
-        <!-- ===== JWT =====
-             jjwt 0.12.3 is the latest stable release. The three artifacts
-             (api / impl / jackson) must always be on the SAME version.
-             - jjwt-api: compile scope (needed at compile time for your code)
-             - jjwt-impl: runtime scope (implementation, loaded by SPI at runtime)
-             - jjwt-jackson: runtime scope (JSON serialization, loaded at runtime)
-             This split is correct and intentional by the JJWT project design.
-        -->
+        <!-- ====================================================== -->
+        <!-- JWT -->
+        <!-- ====================================================== -->
+
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
-            <version>0.12.3</version>
+            <version>${jjwt.version}</version>
         </dependency>
+
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
-            <version>0.12.3</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId>
-            <version>0.12.3</version>
+            <version>${jjwt.version}</version>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- ===== CACHE =====
-             FIX: spring-boot-starter-cache version managed by Boot parent.
-             FIX: caffeine version also managed by Boot 3.2.5 parent at 3.1.8.
-             REMOVED explicit version tag from caffeine — let Boot manage it.
-             Boot-managed version guarantees compatibility with CaffeineCacheManager.
-             The manual CacheConfig @Bean you wrote takes full control of cache
-             setup, so the properties-based config is REMOVED from application.properties.
-        -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- ====================================================== -->
+        <!-- CACHE -->
+        <!-- ====================================================== -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
@@ -131,55 +163,49 @@
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-            <!-- FIX: No version needed — Boot 3.2.5 manages this at 3.1.8 -->
         </dependency>
 
-        <!-- ===== REDIS =====
-             Used for: token blacklisting, OTP storage, distributed caching.
-             Version managed by Boot parent.
-        -->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-data-redis</artifactId>-->
-<!--        </dependency>-->
+        <!-- ====================================================== -->
+        <!-- REDIS (KEEP COMMENTED) -->
+        <!-- ====================================================== -->
 
-        <!-- ===== MAIL ===== -->
+        <!--
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-mail</artifactId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
-
-        <!-- ===== AOP =====
-             Used by your PerformanceLoggingAspect. Version managed by Boot parent.
         -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
-        </dependency>
 
-        <!-- ===== ACTUATOR =====
-             Exposes /actuator/health, /actuator/metrics, /actuator/info etc.
-             Version managed by Boot parent.
-        -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
+        <!-- ====================================================== -->
+        <!-- MAIL -->
+        <!-- ====================================================== -->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
+        <!-- ====================================================== -->
+        <!-- AOP -->
+        <!-- ====================================================== -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
+        <!-- ====================================================== -->
+        <!-- ACTUATOR -->
+        <!-- ====================================================== -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+
+        <!-- ====================================================== -->
+        <!-- PROMETHEUS -->
+        <!-- ====================================================== -->
 
         <dependency>
             <groupId>io.micrometer</groupId>
@@ -187,10 +213,27 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- ====================================================== -->
+        <!-- LOAD BALANCER -->
+        <!-- ====================================================== -->
+
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
+
+        <!-- ====================================================== -->
+        <!-- SPRING SESSION JDBC -->
+        <!-- ====================================================== -->
+
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.session</groupId>-->
+<!--            <artifactId>spring-session-jdbc</artifactId>-->
+<!--        </dependency>-->
+
+        <!-- ====================================================== -->
+        <!-- TWILIO -->
+        <!-- ====================================================== -->
 
         <dependency>
             <groupId>com.twilio.sdk</groupId>
@@ -198,27 +241,34 @@
             <version>10.1.0</version>
         </dependency>
 
-        <dependency><groupId>org.springframework.session</groupId><artifactId>spring-session-jdbc</artifactId></dependency>
-
-        <dependency><groupId>com.cloudinary</groupId><artifactId>cloudinary-http44</artifactId><version>1.36.0</version></dependency>
+        <!-- ====================================================== -->
+        <!-- CLOUDINARY -->
+        <!-- ====================================================== -->
 
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+            <groupId>com.cloudinary</groupId>
+            <artifactId>cloudinary-http5</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+
+        <!-- ====================================================== -->
+        <!-- AWS SDK v2 -->
+        <!-- ====================================================== -->
+
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.twilio.sdk</groupId>
-            <artifactId>twilio</artifactId>
-            <version>10.1.0</version>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sts</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.session</groupId>
-            <artifactId>spring-session-jdbc</artifactId>
-        </dependency>
+        <!-- ====================================================== -->
+        <!-- TESTING -->
+        <!-- ====================================================== -->
 
-        <!-- ===== TEST ===== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -226,70 +276,86 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.session</groupId>
-            <artifactId>spring-session-jdbc</artifactId>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
         </dependency>
+
     </dependencies>
-    
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <!-- ================= BUILD ================= -->
     <build>
+        <finalName>multiuser-demo</finalName>
         <plugins>
 
+            <!-- ================================================== -->
+            <!-- COMPILER -->
+            <!-- ================================================== -->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
-                <!-- FIX: 3.13.0 is the latest stable as of 2025 vs your 3.12.1 -->
+
                 <configuration>
+
                     <release>21</release>
-                    <!-- FIX: Use <release> instead of <source>+<target> for Java 9+ -->
+
                     <annotationProcessorPaths>
+
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.34</version>
+                            <version>${lombok.version}</version>
                         </path>
+
                     </annotationProcessorPaths>
+
                 </configuration>
+
             </plugin>
 
-            <!-- ===== SPRING BOOT MAVEN PLUGIN =====
-                 FIX: Explicitly exclude Lombok from the final fat JAR.
-                 Lombok is compile-time only (<scope>provided</scope>) but
-                 explicitly excluding it here is a best-practice safety net.
-            -->
+            <!-- ================================================== -->
+            <!-- TESTS -->
+            <!-- ================================================== -->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.0</version>
+            </plugin>
+
+            <!-- ================================================== -->
+            <!-- SPRING BOOT -->
+            <!-- ================================================== -->
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+
                 <configuration>
+
                     <excludes>
+
                         <exclude>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                         </exclude>
+
                     </excludes>
+
                 </configuration>
+
             </plugin>
 
         </plugins>
+
     </build>
 
 </project>

@@ -47,7 +47,7 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:4200}")
     private String allowedOrigins;
 
-    // ================= SECURITY FILTER CHAIN =================
+    // SECURITY FILTER CHAIN
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -58,7 +58,7 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-                        // ========== PUBLIC ENDPOINTS ==========
+                        // PUBLIC ENDPOINTS
                                 .requestMatchers(
                                         "/api/auth/**",
                                         "/uploads/**",
@@ -68,7 +68,20 @@ public class SecurityConfig {
                                         "/login/oauth2/**",
                                         "/api/oauth2/failure"
                                 ).permitAll()
-                        // ========== USER MANAGEMENT ENDPOINTS ==========
+
+                        // ADMIN PROVISIONING
+                                .requestMatchers("/api/admin/provision/admin-user").hasAuthority("ADMIN")
+                                .requestMatchers("/api/admin/provision/approve/type1/**").hasAuthority("ADMIN")
+                                .requestMatchers("/api/admin/provision/pending/type1").hasAuthority("ADMIN")
+                                .requestMatchers("/api/admin/provision/reset-password/type1/**").hasAuthority("ADMIN")
+
+                        // ADMIN2 PROVISIONING
+                                .requestMatchers("/api/admin/provision/user").hasAnyAuthority("ADMIN", "ADMIN_TYPE2")
+                                .requestMatchers("/api/admin/provision/approve/type2/**").hasAnyAuthority("ADMIN", "ADMIN_TYPE2")
+                                .requestMatchers("/api/admin/provision/pending/type2").hasAnyAuthority("ADMIN", "ADMIN_TYPE2")
+                                .requestMatchers("/api/admin/provision/reset-password/type2/**").hasAnyAuthority("ADMIN", "ADMIN_TYPE2")
+
+                        // USER MANAGEMENT ENDPOINTS
                         // TYPE1 (Admin) User Management
                                 .requestMatchers("/api/type1/admin/**").hasAuthority("ADMIN")
                                 .requestMatchers("/api/type1/admin-type1/**").hasAuthority("ADMIN_TYPE1")
@@ -80,7 +93,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/type2/user-type2/**").hasAuthority("USER_TYPE2")
                         .requestMatchers("/api/type2/all-user/**").hasAnyAuthority("USER", "USER_TYPE1", "USER_TYPE2")
 
-                        // ========== PRODUCT ENDPOINTS ==========
+                        // PRODUCT ENDPOINTS
 
                                 //    Full control — ADMIN only
                                 .requestMatchers("/api/product/admin/**").hasAuthority("ADMIN")
@@ -95,16 +108,16 @@ public class SecurityConfig {
                                 //    Price compare / sort — TYPE2-domain roles
                                 .requestMatchers("/api/product/user-type2/**").hasAnyAuthority("ADMIN", "ADMIN_TYPE2", "USER", "USER_TYPE2")
 
-                                // ========== ORDER ENDPOINTS ==========
+                                // ORDER ENDPOINTS
                                 //    Admin order management — ADMIN + ADMIN_TYPE2
                                 .requestMatchers("/api/orders/admin/**").hasAnyAuthority("ADMIN", "ADMIN_TYPE2")
                                 //    All other order paths — ADMIN + ADMIN_TYPE2 + USER + USER_TYPE2
                                 .requestMatchers("/api/orders/**").hasAnyAuthority("ADMIN", "ADMIN_TYPE2", "USER", "USER_TYPE2")
 
-                                // ========== PROFILE ENDPOINTS ==========
+                                // PROFILE ENDPOINTS
                                 .requestMatchers("/api/profile/**").authenticated()
 
-                                // ========== OAUTH2 ENDPOINTS ==========
+                                // OAUTH2 ENDPOINTS
                                 .requestMatchers("/api/oauth2/**").authenticated()
 //
                         .anyRequest().authenticated()
@@ -119,7 +132,7 @@ public class SecurityConfig {
                 .build();
     }
 
-    // ================= AUTH PROVIDER (FIXED) =================
+    // AUTH PROVIDER (FIXED)
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -129,14 +142,14 @@ public class SecurityConfig {
         return authProvider;
     }
 
-    // ================= PASSWORD ENCODER =================
+    // PASSWORD ENCODER
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // ================= AUTH MANAGER =================
+    // AUTH MANAGER
 
     @Bean
     public AuthenticationManager authenticationManager(
@@ -144,7 +157,7 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
-    // ================= CORS =================
+    // CORS
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

@@ -28,8 +28,11 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     private static final Logger log = LoggerFactory.getLogger(OAuth2SuccessHandler.class);
 
-    @Value("${app.frontend.url:http://localhost:5173}")
-    private String frontendUrl;
+    //    @Value("${app.frontend.url:http://localhost:5173}")
+//    private String frontendUrl;
+
+    @Value("${app.oauth2.redirect-uri}")
+   private String oauthRedirectUri;
 
     private final JwtUtil jwtUtil;
     private final OAuth2ServiceImpl oAuth2Service;
@@ -54,7 +57,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         if (email == null || email.isBlank()) {
             log.error("[OAUTH2] No email claim in OAuth2 token | provider={}", provider);
-            response.sendRedirect(frontendUrl + "/oauth2/callback?error="
+            response.sendRedirect(oauthRedirectUri + "?error=..."
                     + encode("Email not provided by " + provider));
             return;
         }
@@ -74,7 +77,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             log.info("[OAUTH2] JWT issued | email={} | role={}", email, entity.getRole());
 
             // 4. Redirect browser to frontend with tokens as query parameters
-            String redirectUrl = frontendUrl + "/oauth2/callback"
+            String redirectUrl = oauthRedirectUri
                     + "?token="        + encode(token)
                     + "&refreshToken=" + encode(refreshToken)
                     + "&email="        + encode(email)
@@ -87,7 +90,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         } catch (Exception ex) {
             log.error("[OAUTH2] Success handler failed | email={} | error={}", email, ex.getMessage(), ex);
-            response.sendRedirect(frontendUrl + "/oauth2/callback?error=" + encode(ex.getMessage()));
+            response.sendRedirect(oauthRedirectUri + "?error=" + encode("Email not provided by " + provider));
         }
     }
 

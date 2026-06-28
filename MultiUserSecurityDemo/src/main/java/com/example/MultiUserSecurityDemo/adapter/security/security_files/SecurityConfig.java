@@ -163,12 +163,13 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
 
-        List<String> origins  = Arrays.asList(allowedOrigins.split(","));
+        List<String> origins = Arrays.stream(allowedOrigins.split(",")).map(String::trim).toList();
         corsConfig.setAllowedOrigins(origins);
         corsConfig.setAllowedMethods(
                 Arrays.asList("GET", "POST", "PUT", "PATCH" ,"DELETE", "OPTIONS"));
         corsConfig.setAllowedHeaders(List.of("*"));
         corsConfig.setAllowCredentials(true);
+        corsConfig.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();

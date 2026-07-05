@@ -51,7 +51,7 @@ public class UserType2Entity {
     @Builder.Default
     private boolean isApproved = false;
 
-    @Column(name = "isApproved" , nullable = false)
+    @Column(name = "email_verified" , nullable = false)
     @Builder.Default
     private boolean emailVerified = false;
 

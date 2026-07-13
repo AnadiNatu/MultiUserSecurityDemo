@@ -28,11 +28,11 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     private static final Logger log = LoggerFactory.getLogger(OAuth2SuccessHandler.class);
 
-    //    @Value("${app.frontend.url:http://localhost:5173}")
+//    @Value("${app.frontend.url:http://localhost:5173}")
 //    private String frontendUrl;
 
-    @Value("${app.oauth2.redirect-uri}")
-   private String oauthRedirectUri;
+    @Value("${app.oauth2.redirect-uri:http://localhost:5173/oauth2/callback}")
+    private String oauthRedirectUri;
 
     private final JwtUtil jwtUtil;
     private final OAuth2ServiceImpl oAuth2Service;
@@ -48,9 +48,12 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String email      = oAuth2User.getAttribute("email");
         String name       = oAuth2User.getAttribute("name");
         String provider   = oAuth2Service.determineProvider(oAuth2User);
-        String providerId = oAuth2User.getAttribute("sub");          // Google
+
+        // Google uses "sub", GitHub uses "id" (numeric)
+        String providerId = oAuth2User.getAttribute("sub");
         if (providerId == null) {
-            providerId = oAuth2User.getAttribute("id");              // GitHub (numeric)
+            Object idAttr = oAuth2User.getAttribute("id");
+            providerId = idAttr != null ? String.valueOf(idAttr) : null;
         }
 
         log.info("[OAUTH2] Success handler invoked | provider={} | email={}", provider, email);
@@ -66,6 +69,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             // 1. Find or create the TYPE2 user record
             UserType2Entity entity = oAuth2Service.handleOAuthUser(
                     email, name, provider, providerId, oAuth2User);
+
+            entity.setApproved(true);
+            entity.setEmailVerified(true);
+
 
             // 2. Map entity → domain model → UserDetails wrapper
             UserType2Details userDetails = toUserDetails(entity);
@@ -101,10 +108,13 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         domain.setEmail(entity.getEmail());
         domain.setFname(entity.getFname());
         domain.setLname(entity.getLname());
-        domain.setPassword(entity.getPassword());
+        domain.setPassword(entity.getPassword() != null ? entity.getPassword() : "");
         domain.setPhoneNumber(entity.getPhoneNumber());
         domain.setProfilePicture(entity.getProfilePicture());
         domain.setRole(UserRoles2.valueOf(entity.getRole()));
+        // OAuth Approval
+        domain.setApproved(true);
+        domain.setEmailVerified(true);
         return new UserType2Details(domain);
     }
 

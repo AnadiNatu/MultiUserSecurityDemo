@@ -1,6 +1,7 @@
 package com.example.MultiUserSecurityDemo.adapter.security.security_files;
 
 import com.example.MultiUserSecurityDemo.adapter.security.oauth2.OAuth2SuccessHandler;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -66,7 +67,10 @@ public class SecurityConfig {
                                         "/api/otp/**",
                                         "/oauth2/**",
                                         "/login/oauth2/**",
-                                        "/api/oauth2/failure"
+                                        "/api/oauth2/failure",
+                                        "/api/password/forgot",
+                                        "/api/password/reset",
+                                        "/api/password/change"
                                 ).permitAll()
 
                         // ADMIN PROVISIONING
@@ -129,6 +133,9 @@ public class SecurityConfig {
                         .redirectionEndpoint(endpoint -> endpoint.baseUri("/login/oauth2/code/"))
                         .successHandler(oAuth2SuccessHandler)
                         .failureUrl(frontendUrl + "/oauth2/callback?error=oauth2_failed"))
+                .exceptionHandling(ex -> ex.authenticationEntryPoint((request ,response , authException) -> {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED , authException.getMessage());
+                }))
                 .build();
     }
 

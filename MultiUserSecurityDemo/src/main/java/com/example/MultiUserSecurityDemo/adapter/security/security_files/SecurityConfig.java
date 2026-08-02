@@ -129,7 +129,7 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
-                        .authorizationEndpoint(endpoint -> endpoint.baseUri("/oauth/authorization"))
+                        .authorizationEndpoint(endpoint -> endpoint.baseUri("/oauth2/authorization"))
                         .redirectionEndpoint(endpoint -> endpoint.baseUri("/login/oauth2/code/"))
                         .successHandler(oAuth2SuccessHandler)
                         .failureUrl(frontendUrl + "/oauth2/callback?error=oauth2_failed"))

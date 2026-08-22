@@ -97,8 +97,8 @@ public class TestDataFactory {
                 .items(List.of(item))
                 .status("PENDING")
                 .totalAmount(new BigDecimal("179998"))
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now().toString())
+                .updatedAt(LocalDateTime.now().toString())
                 .build();
     }
 
